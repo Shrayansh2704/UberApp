@@ -1,0 +1,48 @@
+const mongoose = requrie('mongoose');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+const userSchema = new mongoose.Schema({
+    fullname : {
+        firstName : {
+            type : String,
+            required : true,
+            minlength:[3,'First Name atleast be 3 character long'],
+        },
+        lastName : {
+            type : String,
+            minlength:[3,'Last Name atleast be 3 character long'],
+        }
+    },
+    email:{
+        type : String,
+        required : true,
+        unique : true,
+        minlength:[11,'Email atleast be 11 character long'],
+    },
+    password:{
+        type : String,
+        required : true,
+        select : false
+    },
+    socketId:{
+        type : String,
+    }
+})
+
+userSchema.methods.generateAuthToken = ()=>{
+    const token = jwt.sign({_id: this.id}, process.env.JWT_SECRET);
+    return token;
+}
+
+userSchema.methods.comparePassword = async (password)=>{
+    return await bcrypt.compare(password, this.password);
+}
+
+userSchema.statics.hashPassword = async (password)=>{
+    const salt = await bcrypt.genSalt(10);
+    return await bcrypt.hash(password, salt);
+}
+const userModel = mongoose.model('user', userSchema);
+
+module.exports = userModel;
