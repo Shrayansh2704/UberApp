@@ -7,7 +7,7 @@ module.exports.register = async({
         throw new Error("Please provide all required fields");
     }
     const user = userModel.create({
-        fullname: {
+        fullName: {
             firstName,
             lastName
         },
