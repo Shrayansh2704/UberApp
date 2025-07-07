@@ -280,3 +280,156 @@ Nope. This one’s public too — credentials are your ticket in.
 - `user.service.js` – not used here directly, but involved elsewhere in user logic.
 
 ---
+
+---
+
+# 👤 User Profile Endpoint Documentation
+
+### 📌 GET /users/profile
+
+This endpoint retrieves the profile information of the currently authenticated user.
+
+---
+
+### 📝 Description
+
+The `/users/profile` endpoint:
+
+- Requires a valid **JWT token** via the `Authorization` header.
+- Returns the authenticated user’s information.
+- Does **not** expose sensitive data like the password.
+
+---
+
+### 📥 Request Headers
+
+| Header          | Value                | Required | Description                                    |
+|-----------------|----------------------|----------|------------------------------------------------|
+| Authorization   | `Bearer <JWT_token>` | ✅ Yes   | Must be a valid token from login or register   |
+
+---
+
+### ✅ Success Response
+
+**Status Code:** `200 OK`
+
+**Response Example:**
+
+```json
+{
+  "user": {
+    "_id": "64fbe4aa0f4a8a36c8947f00",
+    "fullName": {
+      "firstName": "John",
+      "lastName": "Doe"
+    },
+    "email": "john.doe@example.com",
+    "socketId": null
+  }
+}
+```
+
+---
+
+### ❌ Error Response
+
+#### 🚫 401 Unauthorized
+
+If the JWT token is missing or invalid.
+
+```json
+{
+  "message": "Unauthorized"
+}
+```
+
+---
+
+### 🔓 Auth Required?
+
+✅ Yes — must include valid token in the `Authorization` header.
+
+---
+
+### 📂 Related Files
+
+- `user.routes.js` – defines the `GET /profile` route.
+- `user.controller.js` – contains the logic to return `req.user`.
+- `auth.middleware.js` – verifies and injects user from JWT.
+
+---
+
+# 🚪 User Logout Endpoint Documentation
+
+### 📌 GET /users/logout
+
+This endpoint logs the user out by clearing the JWT cookie and blacklisting the token.
+
+---
+
+### 📝 Description
+
+The `/users/logout` endpoint:
+
+- Requires a valid **JWT token**.
+- Clears the authentication cookie (`token`).
+- Stores the token in a **blacklist** so it can’t be reused.
+
+---
+
+### 📥 Request Headers
+
+| Header          | Value                | Required | Description                                     |
+|-----------------|----------------------|----------|-------------------------------------------------|
+| Authorization   | `Bearer <JWT_token>` | ✅ Yes   | Token will be invalidated after logout          |
+
+---
+
+### ✅ Success Response
+
+**Status Code:** `200 OK`
+
+**Response Example:**
+
+```json
+{
+  "message": "Logged out successfully"
+}
+```
+
+---
+
+### ❌ Error Response
+
+#### 🚫 401 Unauthorized
+
+If the user is not authenticated or token is missing.
+
+```json
+{
+  "message": "Unauthorized"
+}
+```
+
+---
+
+### 🔓 Auth Required?
+
+✅ Yes — must be authenticated.
+
+---
+
+### ⚠️ Important Notes
+
+- Token is stored in a **blacklist**, so future requests using it will fail.
+- Token is extracted from `Authorization` header or cookie.
+
+---
+
+### 📂 Related Files
+
+- `user.routes.js` – defines the `GET /logout` route.
+- `user.controller.js` – handles the logout logic.
+- `blacklistToken.model.js` – stores blacklisted tokens.
+- `auth.middleware.js` – ensures only authenticated users can access.
+
