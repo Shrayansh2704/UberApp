@@ -57,7 +57,7 @@ The `/users/register` endpoint handles the creation of a new user account. It:
       "lastName": "Doe"
     },
     "email": "john.doe@example.com",
-    "socketId": null // for tracking purpose
+    "socketId": null
   }
 }
 ```
@@ -142,5 +142,141 @@ Nope. This is a public endpoint. No token needed to register.
 - `user.controller.js` – handles the incoming request and returns response.
 - `user.model.js` – defines the schema and validation logic.
 - `user.service.js` – handles business logic for registering users.
+
+---
+
+# 🔑 User Login Endpoint Documentation
+
+## 📌 POST /users/login
+
+This endpoint allows a registered user to log in. If the credentials are valid, it returns a **JWT token** and the user details (no password leaks, pinky promise 🤞).
+
+---
+
+## 📝 Description
+
+The `/users/login` endpoint handles authentication for users. It:
+
+- Validates email and password via `express-validator`.
+- Checks if the user exists and if the password matches.
+- Returns a JWT token and user info (excluding sensitive data).
+
+---
+
+## 📥 Request Body
+
+```json
+{
+  "email": "john.doe@example.com",
+  "password": "securePassword123"
+}
+```
+
+### 🔐 Required Fields
+
+| Field     | Type   | Required | Rules / Description                      |
+|-----------|--------|----------|------------------------------------------|
+| `email`   | String | ✅ Yes   | Must be a valid email                    |
+| `password`| String | ✅ Yes   | Minimum 6 characters                     |
+
+---
+
+## ✅ Success Response
+
+**Status Code:** `200 OK`
+
+**Response Example:**
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "_id": "64fbe4aa0f4a8a36c8947f00",
+    "fullName": {
+      "firstName": "John",
+      "lastName": "Doe"
+    },
+    "email": "john.doe@example.com",
+    "socketId": null
+  }
+}
+```
+
+---
+
+## ❌ Error Responses
+
+### 🚫 400 Bad Request
+
+If validation fails (like invalid email format or short password).
+
+```json
+{
+  "errors": [
+    {
+      "msg": "Password must be at least 6 characters long",
+      "param": "password",
+      "location": "body"
+    }
+  ]
+}
+```
+
+### 🚫 401 Unauthorized
+
+If the email doesn't exist or the password doesn't match.
+
+```json
+{
+  "message": "Invalid email or password"
+}
+```
+
+---
+
+## ⚙️ Behind the Scenes
+
+- **Validation** is handled in `user.routes.js` using `express-validator`.
+- **Password Comparison** uses bcrypt’s `.compare()` method.
+- **JWT Token** is created via `generateAuthToken()` on the user model.
+- **Auth Logic** lives in `user.controller.js`.
+
+---
+
+## 🧪 Example Curl Request
+
+```bash
+curl -X POST http://localhost:3000/users/login   -H "Content-Type: application/json"   -d '{
+  "email": "john.doe@example.com",
+  "password": "securePassword123"
+}'
+```
+
+---
+
+## 🔓 Auth Required?
+
+Nope. This one’s public too — credentials are your ticket in.
+
+---
+
+## ⚠️ Important Notes
+
+- Both `email` and `password` must be valid or you'll get rejected real quick.
+- Don’t forget to save the token client-side — you’ll need it for accessing protected routes later.
+- Token format in headers should be:
+
+  ```http
+  Authorization: Bearer <token>
+  ```
+
+---
+
+## 📂 Related Files
+
+- `user.routes.js` – defines the POST `/login` route.
+- `user.controller.js` – handles authentication logic.
+- `user.model.js` – defines password comparison + token generation.
+- `user.service.js` – not used here directly, but involved elsewhere in user logic.
 
 ---
