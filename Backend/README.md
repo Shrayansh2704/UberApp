@@ -433,3 +433,365 @@ If the user is not authenticated or token is missing.
 - `blacklistToken.model.js` – stores blacklisted tokens.
 - `auth.middleware.js` – ensures only authenticated users can access.
 
+---
+
+# 🧭 Captain Registration Endpoint Documentation
+
+## 📌 POST /captains/register
+
+This endpoint allows a new **Captain** to register on the platform. On successful registration, a **JWT token** is returned along with the captain’s details.
+
+---
+
+## 📝 Description
+
+The `/captains/register` endpoint:
+
+* Validates the request using `express-validator`.
+* Hashes the password using bcrypt.
+* Stores captain and vehicle info in MongoDB.
+* Returns a JWT token + captain info (excluding sensitive data).
+
+---
+
+## 📥 Request Body
+
+```json
+{
+  "fullName": {
+    "firstName": "Rick",
+    "lastName": "Grimes"
+  },
+  "email": "rick.grimes@example.com",
+  "password": "drivingSafe123",
+  "vehicle": {
+    "color": "Black",
+    "plate": "AB1234",
+    "capacity": 4,
+    "vehicleType": "car"
+  }
+}
+```
+
+### 🔐 Required Fields
+
+| Field                 | Type   | Required | Rules / Description                  |
+| --------------------- | ------ | -------- | ------------------------------------ |
+| `fullName.firstName`  | String | ✅ Yes    | Minimum 3 characters                 |
+| `fullName.lastName`   | String | ✅ Yes    | Minimum 3 characters                 |
+| `email`               | String | ✅ Yes    | Must be a valid and unique email     |
+| `password`            | String | ✅ Yes    | Minimum 6 characters                 |
+| `vehicle.color`       | String | ✅ Yes    | Minimum 3 characters                 |
+| `vehicle.plate`       | String | ✅ Yes    | Minimum 3 characters, must be unique |
+| `vehicle.capacity`    | Number | ✅ Yes    | Minimum value of 1                   |
+| `vehicle.vehicleType` | String | ✅ Yes    | One of: `'car'`, `'bike'`, `'auto'`  |
+
+---
+
+## ✅ Success Response
+
+**Status Code:** `201 Created`
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "captain": {
+    "_id": "64fbe4aa0f4a8a36c8947abc",
+    "fullName": {
+      "firstName": "Rick",
+      "lastName": "Grimes"
+    },
+    "email": "rick.grimes@example.com",
+    "vehicle": {
+      "color": "Black",
+      "plate": "AB1234",
+      "capacity": 4,
+      "vehicleType": "car"
+    },
+    "status": "inactive",
+    "socketId": null
+  }
+}
+```
+
+---
+
+## ❌ Error Responses
+
+### 🚫 400 Bad Request
+
+```json
+{
+  "errors": [
+    {
+      "msg": "Password must be atleast 6 characters long",
+      "param": "password",
+      "location": "body"
+    }
+  ]
+}
+```
+
+---
+
+## 🔓 Auth Required?
+
+❌ No — this is a public endpoint.
+
+---
+
+## 📂 Related Files
+
+* `captain.routes.js` – defines the POST `/register` route.
+* `captain.controller.js` – handles registration logic.
+* `captain.model.js` – defines the schema and validation.
+* `captain.service.js` – handles business logic for creating captains.
+
+---
+
+# 🔐 Captain Login Endpoint Documentation
+
+## 📌 POST /captains/login
+
+Allows a registered captain to log in and receive a **JWT token** for authentication.
+
+---
+
+## 📝 Description
+
+The `/captains/login` endpoint:
+
+* Validates the email and password.
+* Verifies credentials against stored data.
+* Returns a JWT token + captain info (password excluded).
+
+---
+
+## 📥 Request Body
+
+```json
+{
+  "email": "rick.grimes@example.com",
+  "password": "drivingSafe123"
+}
+```
+
+### 🔐 Required Fields
+
+| Field      | Type   | Required | Rules / Description   |
+| ---------- | ------ | -------- | --------------------- |
+| `email`    | String | ✅ Yes    | Must be a valid email |
+| `password` | String | ✅ Yes    | Minimum 6 characters  |
+
+---
+
+## ✅ Success Response
+
+**Status Code:** `200 OK`
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "captain": {
+    "_id": "64fbe4aa0f4a8a36c8947abc",
+    "fullName": {
+      "firstName": "Rick",
+      "lastName": "Grimes"
+    },
+    "email": "rick.grimes@example.com",
+    "vehicle": {
+      "color": "Black",
+      "plate": "AB1234",
+      "capacity": 4,
+      "vehicleType": "car"
+    },
+    "status": "inactive",
+    "socketId": null
+  }
+}
+```
+
+---
+
+## ❌ Error Responses
+
+### 🚫 400 Bad Request
+
+```json
+{
+  "error": [
+    {
+      "msg": "Invalid email format",
+      "param": "email",
+      "location": "body"
+    }
+  ]
+}
+```
+
+### 🚫 401 Unauthorized
+
+```json
+{
+  "message": "Invalid email or password"
+}
+```
+
+---
+
+## 🔓 Auth Required?
+
+❌ No — login is open.
+
+---
+
+## 📂 Related Files
+
+* `captain.routes.js` – defines the POST `/login` route.
+* `captain.controller.js` – handles authentication.
+* `captain.model.js` – manages password comparison & JWT generation.
+
+---
+
+# 👤 Captain Profile Endpoint Documentation
+
+## 📌 GET /captains/profile
+
+Returns the currently authenticated captain’s profile details.
+
+---
+
+## 📝 Description
+
+The `/captains/profile` endpoint:
+
+* Requires a valid JWT token in the request header.
+* Returns the captain info if authenticated.
+
+---
+
+## 📥 Request Headers
+
+| Header        | Value                | Required | Description                   |
+| ------------- | -------------------- | -------- | ----------------------------- |
+| Authorization | Bearer `<JWT_token>` | ✅ Yes    | JWT token from login/register |
+
+---
+
+## ✅ Success Response
+
+**Status Code:** `200 OK`
+
+```json
+{
+  "captain": {
+    "_id": "64fbe4aa0f4a8a36c8947abc",
+    "fullName": {
+      "firstName": "Rick",
+      "lastName": "Grimes"
+    },
+    "email": "rick.grimes@example.com",
+    "vehicle": {
+      "color": "Black",
+      "plate": "AB1234",
+      "capacity": 4,
+      "vehicleType": "car"
+    },
+    "status": "inactive",
+    "socketId": null
+  }
+}
+```
+
+---
+
+## ❌ Error Response
+
+### 🚫 404 Not Found
+
+```json
+{
+  "message": "Captain not found"
+}
+```
+
+---
+
+## 🔓 Auth Required?
+
+✅ Yes
+
+---
+
+## 📂 Related Files
+
+* `captain.routes.js` – defines GET `/profile`
+* `captain.controller.js` – contains logic
+* `auth.middleware.js` – verifies JWT and injects `req.captain`
+
+---
+
+# 🚪 Captain Logout Endpoint Documentation
+
+## 📌 GET /captains/logout
+
+Logs out the currently authenticated captain.
+
+---
+
+## 📝 Description
+
+The `/captains/logout` endpoint:
+
+* Requires a valid JWT token.
+* Blacklists the token to prevent reuse.
+* Clears the authentication cookie.
+
+---
+
+## 📥 Request Headers
+
+| Header        | Value                | Required | Description                 |
+| ------------- | -------------------- | -------- | --------------------------- |
+| Authorization | Bearer `<JWT_token>` | ✅ Yes    | JWT token to be invalidated |
+
+---
+
+## ✅ Success Response
+
+**Status Code:** `200 OK`
+
+```json
+{
+  "message": "Logged out successfully"
+}
+```
+
+---
+
+## ❌ Error Response
+
+### 🚫 401 Unauthorized
+
+```json
+{
+  "message": "Unauthorized access"
+}
+```
+
+---
+
+## 🔓 Auth Required?
+
+✅ Yes
+
+---
+
+## 📂 Related Files
+
+* `captain.routes.js` – defines GET `/logout`
+* `captain.controller.js` – performs token blacklist + cookie clear
+* `blacklistToken.model.js` – stores revoked tokens
+* `auth.middleware.js` – ensures JWT is valid
+
+---

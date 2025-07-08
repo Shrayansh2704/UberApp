@@ -7,18 +7,18 @@ const userSchema = new mongoose.Schema({
         firstName : {
             type : String,
             required : true,
-            minlength:[3,'First Name atleast be 3 character long'],
+            minlength:[3,'First Name atleast be 3 character long']
         },
         lastName : {
             type : String,
-            minlength:[3,'Last Name atleast be 3 character long'],
+            minlength:[3,'Last Name atleast be 3 character long']
         }
     },
     email:{
         type : String,
         required : true,
         unique : true,
-        minlength:[11,'Email atleast be 11 character long'],
+        minlength:[11,'Email atleast be 11 character long']
     },
     password:{
         type : String,
@@ -26,12 +26,12 @@ const userSchema = new mongoose.Schema({
         select : false
     },
     socketId:{
-        type : String,
+        type : String
     }
 })
 
 userSchema.methods.generateAuthToken = function(){
-    const token = jwt.sign({_id: this.id}, process.env.JWT_SECRET,{ expiresIn: '2d' });
+    const token = jwt.sign({_id: this.id}, process.env.JWT_SECRET,{ expiresIn: '2d' }); 
     return token;
 }
 
