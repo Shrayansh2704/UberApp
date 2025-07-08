@@ -1,1 +1,1 @@
-Making a Basic Uber Web App using MERN Stack
+Making a Basic Uber App using MERN Stack
